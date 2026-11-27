@@ -1,2 +1,5 @@
-# SumiUpdates
-Sumi for macOS — application downloads and signed update feed only.
+# Sumi for macOS
+
+Sumi.appと署名付き更新情報の配布専用リポジトリです。ソースコードや利用者のPDF・注釈は含みません。
+
+配信準備中です。
