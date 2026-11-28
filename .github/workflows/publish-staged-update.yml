@@ -1,0 +1,96 @@
+name: Publish verified app update
+on:
+  push:
+    branches: [main]
+    paths: ['.release-staging/manifest.json']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: publish-app-update
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.repository == 'arimoteeee-blip/SumiUpdates' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and verify signed app artifact
+        run: |
+          python3 - <<'PY'
+          import base64, hashlib, io, json, plistlib, re, shutil, subprocess, tempfile, urllib.request, urllib.parse, zipfile
+          from pathlib import Path, PurePosixPath
+          import xml.etree.ElementTree as ET
+          staging = Path('.release-staging')
+          manifest = json.loads((staging / 'manifest.json').read_text())
+          version = manifest['version']
+          assert re.fullmatch(r'\d+\.\d+\.\d+', version)
+          url = urllib.parse.urlparse(manifest['artifactURL'])
+          assert url.scheme == 'https'
+          assert url.hostname.endswith(('.blob.core.windows.net', '.amazonaws.com', '.oaiusercontent.com'))
+          try:
+              with urllib.request.urlopen(manifest['artifactURL'], timeout=60) as response:
+                  artifact = response.read(16 * 1024 * 1024)
+          except Exception:
+              raise SystemExit('Could not download the temporary app artifact; renew its download link.')
+          assert hashlib.sha256(artifact).hexdigest() == manifest['artifactSHA256']
+          filename = 'Sumi-' + version + '.zip'
+          with zipfile.ZipFile(io.BytesIO(artifact)) as outer:
+              def get(name):
+                  matches = [p for p in outer.namelist() if PurePosixPath(p).name == name]
+                  assert len(matches) == 1
+                  return outer.read(matches[0])
+              data, feed = get(filename), get('appcast.xml')
+          assert len(data) == manifest['bytes']
+          assert hashlib.sha256(data).hexdigest() == manifest['sha256']
+          assert hashlib.sha256(feed).hexdigest() == manifest['feedSHA256']
+          signature = re.search(rb'<!-- sparkle-signatures:\s*edSignature: ([A-Za-z0-9+/=]+)\s*length: (\d+)\s*-->\s*$', feed)
+          assert signature and signature.start() == int(signature.group(2))
+          ns = {'sparkle': 'http://www.andymatuschak.org/xml-namespaces/sparkle'}
+          root = ET.fromstring(feed)
+          items = root.findall('./channel/item')
+          assert len(items) == 1
+          item = items[0]
+          assert item.find('sparkle:version', ns).text == manifest['build']
+          assert item.find('sparkle:shortVersionString', ns).text == version
+          enclosure = item.find('enclosure')
+          archive = Path('releases') / ('v' + version) / filename
+          assert enclosure.attrib['url'] == 'https://raw.githubusercontent.com/arimoteeee-blip/SumiUpdates/main/' + archive.as_posix()
+          assert int(enclosure.attrib['length']) == len(data)
+          key = 'ZtWxAF0rAFG0kHOjZF6dh9UPHfW7ByVjUXjIS30NXMg='
+          assert not archive.exists(), 'Never replace an existing release'
+          archive.parent.mkdir(parents=True, exist_ok=True)
+          archive.write_bytes(data)
+          with tempfile.TemporaryDirectory() as tmp:
+              tmp = Path(tmp)
+              public = tmp / 'public.der'
+              public.write_bytes(bytes.fromhex('302a300506032b6570032100') + base64.b64decode(key, validate=True))
+              payload = tmp / 'feed'
+              payload.write_bytes(feed[:int(signature.group(2))])
+              for path, value in [(payload, signature.group(1)), (archive, enclosure.attrib['{' + ns['sparkle'] + '}edSignature'])]:
+                  sig = tmp / 'signature'
+                  sig.write_bytes(base64.b64decode(value, validate=True))
+                  subprocess.run(['openssl', 'pkeyutl', '-verify', '-pubin', '-keyform', 'DER', '-inkey', str(public), '-sigfile', str(sig), '-rawin', '-in', str(path)], check=True)
+          with zipfile.ZipFile(archive) as package:
+              assert package.testzip() is None
+              for name in package.namelist():
+                  path = PurePosixPath(name)
+                  assert not path.is_absolute() and '..' not in path.parts
+                  assert path.suffix.lower() not in {'.swift', '.pdf', '.sqlite', '.db', '.pem', '.p12', '.key'}
+              info = plistlib.loads(package.read('Sumi.app/Contents/Info.plist'))
+              assert info['CFBundleIdentifier'] == 'jp.sumi.native.reader'
+              assert info['CFBundleVersion'] == manifest['build'] and info['CFBundleShortVersionString'] == version
+              assert info['SUPublicEDKey'] == key
+          Path('appcast.xml').write_bytes(feed)
+          Path('README.md').write_bytes((staging / 'README.md').read_bytes())
+          shutil.rmtree(staging)
+          print(f'Verified Sumi {version}, build {manifest["build"]}, {len(data)} bytes, SHA-256 {manifest["sha256"]}')
+          PY
+      - name: Publish archive and feed together
+        run: |
+          git config user.name 'Sumi Updates'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- releases appcast.xml README.md .release-staging
+          git commit -m 'Publish verified Sumi update'
+          git push origin HEAD:main
