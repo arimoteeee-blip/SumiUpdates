@@ -1,0 +1,18 @@
+<?xml version="1.0" standalone="yes"?><!-- sparkle-sign-warning:
+IMPORTANT: This file was signed by Sparkle. Any modifications to this file requires re-signing this file with generate_appcast or sign_update! The signed signature will be embedded at the end of this file.
+--><rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>Sumi</title>
+        <item>
+            <title>0.1.4</title>
+            <pubDate>Sat, 28 Nov 2026 03:56:56 +0000</pubDate>
+            <sparkle:version>6</sparkle:version>
+            <sparkle:shortVersionString>0.1.4</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://raw.githubusercontent.com/arimoteeee-blip/SumiUpdates/main/releases/v0.1.4/Sumi-0.1.4.zip" length="3675573" type="application/octet-stream" sparkle:edSignature="XqytsB1UCOS86eycOArXTA/y24A03j4sxIteSz+KuOwI7j8N8OhvzBwMqaAhsYGvUa8uRoMmNaYw0hXTqCfUCA=="></enclosure>
+        </item>
+    </channel>
+</rss><!-- sparkle-signatures:
+edSignature: /S7/fo4eEd9t1PUdL8LaFb1t+a8E17HPMKTQAZBHXIwvR5CR/qerAokGswU7MiaSKVroMLctwFmfz7bzm7JLBA==
+length: 1054
+-->
