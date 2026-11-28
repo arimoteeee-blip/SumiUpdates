@@ -4,15 +4,15 @@ IMPORTANT: This file was signed by Sparkle. Any modifications to this file requi
     <channel>
         <title>Sumi</title>
         <item>
-            <title>0.1.4</title>
-            <pubDate>Sat, 28 Nov 2026 03:56:56 +0000</pubDate>
-            <sparkle:version>6</sparkle:version>
-            <sparkle:shortVersionString>0.1.4</sparkle:shortVersionString>
+            <title>0.1.5</title>
+            <pubDate>Sat, 28 Nov 2026 09:22:03 +0000</pubDate>
+            <sparkle:version>13</sparkle:version>
+            <sparkle:shortVersionString>0.1.5</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://raw.githubusercontent.com/arimoteeee-blip/SumiUpdates/main/releases/v0.1.4/Sumi-0.1.4.zip" length="3675573" type="application/octet-stream" sparkle:edSignature="XqytsB1UCOS86eycOArXTA/y24A03j4sxIteSz+KuOwI7j8N8OhvzBwMqaAhsYGvUa8uRoMmNaYw0hXTqCfUCA=="></enclosure>
+            <enclosure url="https://raw.githubusercontent.com/arimoteeee-blip/SumiUpdates/main/releases/v0.1.5/Sumi-0.1.5.zip" length="4799371" type="application/octet-stream" sparkle:edSignature="wCpJQUdcOT8scL8CIysi1fBtfcECF0OTDz/2kXUk3uCrwxakSvrgTrHXogRDTXIXCUlX8ayv5G0jOiWeqchADA=="></enclosure>
         </item>
     </channel>
 </rss><!-- sparkle-signatures:
-edSignature: /S7/fo4eEd9t1PUdL8LaFb1t+a8E17HPMKTQAZBHXIwvR5CR/qerAokGswU7MiaSKVroMLctwFmfz7bzm7JLBA==
-length: 1054
+edSignature: tfqtRcX6HtolZltUoIJXr6Tu7vtGw2CKSS0YMoPRGwvgzoR1gj0/f5Hn2TN6+5lpQ4NU1WQ8HDDnrdTaXvkbDQ==
+length: 1055
 -->
